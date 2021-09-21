@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import seaborn
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -11,7 +12,7 @@ print(t250.info())
 #remove contents and headquarters columns are there is too much missing data
 t250.drop(['Content', 'Headquarters'], axis=1, inplace=True)
 
-#to check meanvsales and units sold of all Restaurants
+#to check mean sales and units sold of all Restaurants
 print(t250['Sales'].mean())
 print(t250['Units'].mean())
 
@@ -31,6 +32,17 @@ sns.set_style('darkgrid')
 ax = sns.barplot(x='Restaurant', y='Units', data=Top10_units, palette='bright').set(title='Restaurant Top 10 Units')
 plt.show()
 
+#show top10 sales and units
+comparison = t250[['Restaurant', 'Sales', 'Units']]
+comparison_10 = comparison.head(10)
+print(comparison.head(10))
+sns.set_style('darkgrid')
+ax = seaborn.lineplot(x= 'Sales', y= 'Units', data=comparison_10)
+ax.set_xlabel('Sales')
+ax.set_ylabel('Units')
+ax.set_title('Comparison of top 10 sales and units')
+plt.show()
+
 #comparing top 10 sales and units of companies and mergeing to see which companies are in both categories
 data = [['McDonalds', '40412'], ['Starbucks', '21380'], ['Chick-fil-A', '11320'], ['Taco Bell', '11293'], ['Burger King', '10204'], ['Subway', '10200'], ['Wendys', '9762'], ['Dunkin', '9228'], ['Dominos', '7044'], ['Panera Bread', '5890']]
 df1 = pd.DataFrame(data, columns= ['Restaurant', 'Sales'])
@@ -39,6 +51,12 @@ df2 = pd.DataFrame(data2, columns= ['Restaurant', 'Units'])
 df3 = df1.merge(df2, on='Restaurant', how='left')
 print(df3)
 
+#Group top 10 sales by Segment Categort and calculate price per unit
+Segment_sales = t250.groupby('Segment_Category').sum()
+Segment_sales = Segment_sales.sort_values('Sales', ascending=False)
+Segment_sales ['Price_per_unit'] = Segment_sales['Sales'] / Segment_sales['Units']
+print(Segment_sales.head(10))
+
 #using iterrows to quickly show top 10 sales & top 10 units sold
 for index, row in Top10_sales.iterrows():
     print(row['Restaurant'], row['Sales'])
@@ -46,11 +64,7 @@ for index, row in Top10_sales.iterrows():
 for index, row in Top10_units.iterrows():
     print(row['Restaurant'], row['Units'])
 
-#Group top 10 sales by Segment Categort
-Segment_sales = t250.groupby('Segment_Category').sum()
-Segment_sales = Segment_sales.sort_values('Sales', ascending=False)
-print(Segment_sales.head(10))
-
-#companies with sales less than 2000
-Low_sales = t250.loc[:, 'Sales'] < 2000
+#companies with sales less than 1000
+Low_sales = t250.loc[:, 'Sales'] < 1000
+pd.set_option('display.max_rows' ,None)
 print(Low_sales)
